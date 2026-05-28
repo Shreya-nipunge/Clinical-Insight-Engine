@@ -1,0 +1,62 @@
+name: Sync Labels from Issue to PR
+
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+
+jobs:
+  sync-labels:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: read
+    steps:
+      - name: Copy labels from linked issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const repo = context.repo;
+
+            // Query GitHub's GraphQL API for issues linked to this PR
+            const query = `query($owner:String!, $name:String!, $pr:Int!) {
+              repository(owner:$owner, name:$name) {
+                pullRequest(number:$pr) {
+                  closingIssuesReferences(first: 5) {
+                    nodes {
+                      labels(first: 10) {
+                        nodes {
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }`;
+
+            const variables = { owner: repo.owner, name: repo.repo, pr: prNumber };
+            const result = await github.graphql(query, variables);
+            
+            const issues = result.repository.pullRequest.closingIssuesReferences.nodes;
+            if (issues.length === 0) return;
+
+            // Gather all unique labels from the linked issues
+            const labelsToAdd = [];
+            for (const issue of issues) {
+              if (issue.labels && issue.labels.nodes) {
+                for (const label of issue.labels.nodes) {
+                  labelsToAdd.push(label.name);
+                }
+              }
+            }
+
+            // Apply the extracted labels to the Pull Request
+            if (labelsToAdd.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: repo.owner,
+                repo: repo.repo,
+                issue_number: prNumber,
+                labels: labelsToAdd
+              });
+            }
