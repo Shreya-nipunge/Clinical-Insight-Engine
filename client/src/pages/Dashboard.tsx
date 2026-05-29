@@ -75,6 +75,16 @@ export default function Dashboard() {
     },
   });
 
+  const onSubmit = (data: FormData) => {
+    createAssessment(data, {
+      onSuccess: (data) => {
+        setResult(data);
+        localStorage.removeItem("cardioguard-assessment-draft");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
+  };
+
   const watchedValues = watch();
   const isHypertension = watch("hypertension");
   const isHeartDisease = watch("heartDisease");
@@ -152,6 +162,14 @@ export default function Dashboard() {
       },
     });
   };
+
+  // Autosave draft on form changes
+  const formData = watch();
+  useEffect(() => {
+    if (formData && (formData.age || formData.bmi || formData.hba1cLevel || formData.bloodGlucoseLevel || formData.hypertension || formData.heartDisease)) {
+      localStorage.setItem("cardioguard-assessment-draft", JSON.stringify(formData));
+    }
+  }, [formData]);
 
   return (
     <AppLayout>
