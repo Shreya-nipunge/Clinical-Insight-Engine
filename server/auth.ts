@@ -81,7 +81,12 @@ export function createAuthRouter(): Router {
       return res.status(409).json({ message: "An account with this email already exists." });
     }
 
-    registeredUsers.set(email, { fullName, email, password, licenseNumber });
+    registeredUsers.set(email, {
+      fullName,
+      email,
+      passwordHash: hashPassword(password),
+      licenseNumber
+    });
 
     const otp = generateOtp();
     pendingOtps.set(email, { otp, expiresAt: Date.now() + 10 * 60 * 1000 });
@@ -112,7 +117,7 @@ export function createAuthRouter(): Router {
       userName = "Dr. Smith";
     } else {
       const registeredUser = registeredUsers.get(email);
-      if (registeredUser && registeredUser.password === password) {
+      if (registeredUser && verifyPassword(password, registeredUser.passwordHash)) {
         userName = registeredUser.fullName;
       }
     }
