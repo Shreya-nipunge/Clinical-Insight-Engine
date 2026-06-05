@@ -2,7 +2,7 @@ import { logger } from "../logger";
 import { assessmentQueue } from "../queue";
 import { Router } from "express";
 import { z } from "zod";
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 import { requireAuth, requireVerified } from "../auth";
 import { api } from "@shared/routes";
 import { storage } from "../storage";
