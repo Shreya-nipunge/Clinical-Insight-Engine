@@ -34,7 +34,6 @@ import { AssessmentFilters } from "@/components/AssessmentFilters";
 import { ActiveFilterChips } from "@/components/ActiveFilterChips";
 import { ClearFiltersButton } from "@/components/ClearFiltersButton";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
-import { ClearFiltersButton } from "@/components/ClearFiltersButton";
 import { validateSearchInput } from "@/validation/filterValidation";
 import AssessmentComparisonCard from "@/components/AssessmentComparisonCard";
 import { downloadPatientSummaryPdf } from "@/utils/clinicalPdfReport";
